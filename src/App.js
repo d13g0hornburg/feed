@@ -1,64 +1,83 @@
 import { useState } from "react";
 import "./App.css";
 import { db } from "./firebaseConnection";
-import { setDoc, doc, collection, addDoc, getDoc, getDocs} from "firebase/firestore";
- 
+import { updateDoc, setDoc, doc, collection, addDoc, getDoc, getDocs, deleteDoc } from "firebase/firestore";
+
 function App() {
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
   const [posts, setPosts] = useState([]);
- 
+  const [idPost, setIdPost] = useState('');
+
   async function adicionar() {
-    // await setDoc(doc(db, "posts", "129"), {
-    //   titulo: titulo,
-    //   autor: autor
-    // })
-    await addDoc(collection(db, "posts"), {
-      titulo:titulo,
-      autor:autor
-    })
-    .then(() => {
+    try {
+      await addDoc(collection(db, "posts"), {
+        titulo: titulo,
+        autor: autor
+      });
       console.log("Dados cadastrados");
       setAutor("");
       setTitulo("");
-    })
-    .catch((error) => {
+    } catch (error) {
       console.log("Deu erro: " + error);
-    });
+    }
   }
-  async function buscarPosts(){
-    // const postRef = doc(db, "posts", "128")
- 
-    // await getDoc(postRef)
-    // .then((snapshot) => {
-    //   setAutor(snapshot.data().autor)
-    //   setTitulo(snapshot.data().titulo)
-    // })
-    // .catch((error) => {
-    //   console.log("Deu erro: " + error);
-    // });
-  const postRef = collection(db, "posts")
-  await getDocs(postRef)
- 
-  .then((snapshot) =>{
-    let lista = [];
-    snapshot.forEach((doc) => {
-      lista.push({
-        id:doc.id,
-        titulo: doc.data().titulo,
-        autor: doc.data().autor
-      })
-  });
-  setPosts(lista);
-  })
-  .catch(()=>{
-    console.log("Erro")
-  })
+
+  async function buscarPosts() {
+    const postRef = collection(db, "posts");
+    try {
+      const snapshot = await getDocs(postRef);
+      let lista = [];
+      snapshot.forEach((doc) => {
+        lista.push({
+          id: doc.id,
+          titulo: doc.data().titulo,
+          autor: doc.data().autor
+        });
+      });
+      setPosts(lista);
+    } catch (error) {
+      console.log("Erro: " + error);
+    }
   }
- 
- 
+
+  async function excluirPost(id) {
+    const docRef = doc(db, "posts", id);
+    try {
+      await deleteDoc(docRef);
+      console.log("Post excluído");
+      buscarPosts(); // Atualiza a lista de posts após a exclusão
+    } catch (error) {
+      console.log("Deu erro: " + error);
+    }
+  }
+
+  async function atualizarPost() {
+    const docRef = doc(db, "posts", idPost);
+    try {
+      await updateDoc(docRef, {
+        titulo: titulo,
+        autor: autor
+      });
+      console.log("Post atualizado!");
+      setIdPost('');
+      setTitulo('');
+      setAutor('');
+      buscarPosts(); // Atualiza a lista de posts após a atualização
+    } catch (error) {
+      console.log("Deu erro: " + error);
+    }
+  }
+
   return (
     <div className="Container">
+      <label>Id Post:</label>
+      <input
+        type="text"
+        placeholder="ID do Post"
+        value={idPost}
+        onChange={(e) => setIdPost(e.target.value)}
+      />
       <label>Título: </label>
       <textarea
         type="text"
@@ -75,21 +94,20 @@ function App() {
       />
       <button onClick={buscarPosts}>Buscar</button>
       <button onClick={adicionar}>Cadastrar</button>
- 
+      <button onClick={atualizarPost}>Atualizar Post</button>
+
       <ul>
-        {posts.map((post) => {
-          return(
-            <li key={post.id}>
-              <span>titulo: {post.titulo}</span><br/>
-              <span>Autor: {post.autor}</span><br></br>
- 
-            </li>
-          )
-        })}
+        {posts.map((post) => (
+          <li key={post.id}>
+            <span>Id Post: {post.id}</span><br />
+            <span>Título: {post.titulo}</span><br />
+            <span>Autor: {post.autor}</span><br />
+            <button onClick={() => excluirPost(post.id)}>Excluir Post</button>
+          </li>
+        ))}
       </ul>
     </div>
   );
 }
- 
+
 export default App;
- 

@@ -1,76 +1,47 @@
 import { useState } from "react";
 import "./App.css";
-import { db } from "./firebaseConnection";
-import { updateDoc, setDoc, doc, collection, addDoc, getDoc, getDocs, deleteDoc } from "firebase/firestore";
+import { usePosts } from "./usePosts";
 
 function App() {
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
-  const [posts, setPosts] = useState([]);
   const [idPost, setIdPost] = useState('');
+  const [busca, setBusca] = useState('');
+  const { posts, adicionarPost, atualizarPost, excluirPost } = usePosts();
 
-  async function adicionar() {
-    try {
-      await addDoc(collection(db, "posts"), {
-        titulo: titulo,
-        autor: autor
-      });
-      console.log("Dados cadastrados");
-      setAutor("");
-      setTitulo("");
-    } catch (error) {
-      console.log("Deu erro: " + error);
-    }
-  }
+  const handleAdicionar = () => {
+    adicionarPost(titulo, autor);
+    setTitulo('');
+    setAutor('');
+  };
 
-  async function buscarPosts() {
-    const postRef = collection(db, "posts");
-    try {
-      const snapshot = await getDocs(postRef);
-      let lista = [];
-      snapshot.forEach((doc) => {
-        lista.push({
-          id: doc.id,
-          titulo: doc.data().titulo,
-          autor: doc.data().autor
-        });
-      });
-      setPosts(lista);
-    } catch (error) {
-      console.log("Erro: " + error);
-    }
-  }
+  const handleAtualizar = () => {
+    atualizarPost(idPost, titulo, autor);
+    setIdPost('');
+    setTitulo('');
+    setAutor('');
+  };
 
-  async function excluirPost(id) {
-    const docRef = doc(db, "posts", id);
-    try {
-      await deleteDoc(docRef);
-      console.log("Post excluído");
-      buscarPosts(); // Atualiza a lista de posts após a exclusão
-    } catch (error) {
-      console.log("Deu erro: " + error);
-    }
-  }
+  const handleEditar = (post) => {
+    setIdPost(post.id);
+    setTitulo(post.titulo);
+    setAutor(post.autor);
+  };
 
-  async function atualizarPost() {
-    const docRef = doc(db, "posts", idPost);
-    try {
-      await updateDoc(docRef, {
-        titulo: titulo,
-        autor: autor
-      });
-      console.log("Post atualizado!");
-      setIdPost('');
-      setTitulo('');
-      setAutor('');
-      buscarPosts(); // Atualiza a lista de posts após a atualização
-    } catch (error) {
-      console.log("Deu erro: " + error);
-    }
-  }
+  const postsFiltrados = posts.filter(post => 
+    post.titulo.toLowerCase().includes(busca.toLowerCase())
+  );
 
   return (
     <div className="Container">
+      <h1>Rede Social de Tecnologia</h1>
+      <label>Buscar:</label>
+      <input
+        type="text"
+        placeholder="Buscar por título"
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+      />
       <label>Id Post:</label>
       <input
         type="text"
@@ -92,16 +63,16 @@ function App() {
         value={autor}
         onChange={(e) => setAutor(e.target.value)}
       />
-      <button onClick={buscarPosts}>Buscar</button>
-      <button onClick={adicionar}>Cadastrar</button>
-      <button onClick={atualizarPost}>Atualizar Post</button>
+      <button onClick={handleAdicionar}>Cadastrar</button>
+      <button onClick={handleAtualizar}>Atualizar Post</button>
 
       <ul>
-        {posts.map((post) => (
+        {postsFiltrados.map((post) => (
           <li key={post.id}>
             <span>Id Post: {post.id}</span><br />
             <span>Título: {post.titulo}</span><br />
             <span>Autor: {post.autor}</span><br />
+            <button onClick={() => handleEditar(post)}>Editar Post</button>
             <button onClick={() => excluirPost(post.id)}>Excluir Post</button>
           </li>
         ))}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Container, Row, Col, Form, Button, ListGroup, Image } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, ListGroup, Image, Alert } from "react-bootstrap";
 import "./App.css";
 import { usePosts } from "./usePosts";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -11,24 +11,35 @@ function App() {
   const [imagem, setImagem] = useState(null);
   const [idPost, setIdPost] = useState('');
   const [busca, setBusca] = useState('');
-  const [currentPage, setCurrentPage] = useState(0); // Estado para controlar a página atual
-  const { posts, adicionarPost, atualizarPost, excluirPost } = usePosts(); // Removido loadMorePosts
+  const [currentPage, setCurrentPage] = useState(0);
+  const [error, setError] = useState('');
+  const { posts, adicionarPost, atualizarPost, excluirPost } = usePosts();
 
   const handleAdicionar = () => {
+    if (!titulo || !autor || !mensagem) {
+      setError('Todos os campos são obrigatórios.');
+      return;
+    }
     adicionarPost(titulo, autor, mensagem, imagem);
     setTitulo('');
     setAutor('');
     setMensagem('');
     setImagem(null);
+    setError('');
   };
 
   const handleAtualizar = () => {
+    if (!titulo || !autor || !mensagem) {
+      setError('Todos os campos são obrigatórios.');
+      return;
+    }
     atualizarPost(idPost, titulo, autor, mensagem, imagem);
     setIdPost('');
     setTitulo('');
     setAutor('');
     setMensagem('');
     setImagem(null);
+    setError('');
   };
 
   const handleEditar = (post) => {
@@ -41,7 +52,7 @@ function App() {
 
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setImagem(URL.createObjectURL(e.target.files[0]));
+      setImagem(e.target.files[0]);
     }
   };
 
@@ -66,6 +77,7 @@ function App() {
       <Row>
         <Col xs={12} md={4}>
           <h1>Adicionar/Editar Post</h1>
+          {error && <Alert variant="danger">{error}</Alert>}
           <Form>
             <Form.Group controlId="formIdPost">
               <Form.Label>Id Post:</Form.Label>
@@ -74,6 +86,7 @@ function App() {
                 placeholder="ID do Post"
                 value={idPost}
                 onChange={(e) => setIdPost(e.target.value)}
+                disabled
               />
             </Form.Group>
             <Form.Group controlId="formTitulo">
@@ -83,6 +96,7 @@ function App() {
                 placeholder="Digite o título"
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
+                required
               />
             </Form.Group>
             <Form.Group controlId="formMensagem">
@@ -93,6 +107,7 @@ function App() {
                 placeholder="Digite a mensagem"
                 value={mensagem}
                 onChange={(e) => setMensagem(e.target.value)}
+                required
               />
             </Form.Group>
             <Form.Group controlId="formAutor">
@@ -102,6 +117,7 @@ function App() {
                 placeholder="Autor do Post"
                 value={autor}
                 onChange={(e) => setAutor(e.target.value)}
+                required
               />
             </Form.Group>
             <Form.Group controlId="formImagem">
@@ -110,7 +126,7 @@ function App() {
                 type="file"
                 onChange={handleImageChange}
               />
-              {imagem && <Image src={imagem} alt="Capa do Post" fluid />}
+              {imagem && <Image src={URL.createObjectURL(imagem)} alt="Capa do Post" fluid />}
             </Form.Group>
             <Button variant="primary" onClick={handleAdicionar} className="mr-2">Cadastrar</Button>
             <Button variant="secondary" onClick={handleAtualizar}>Atualizar Post</Button>

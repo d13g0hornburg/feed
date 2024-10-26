@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { db } from "./firebaseConnection";
+import { db, storage } from "./firebaseConnection";
 import { updateDoc, addDoc, doc, collection, getDocs, deleteDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export function usePosts() {
   const [posts, setPosts] = useState([]);
@@ -34,9 +35,19 @@ export function usePosts() {
     }
   }
 
+  async function uploadImage(file) {
+    const storageRef = ref(storage, `images/${file.name}`);
+    await uploadBytes(storageRef, file);
+    return await getDownloadURL(storageRef);
+  }
+
   async function adicionarPost(titulo, autor, mensagem, imagem) {
     try {
-      await addDoc(collection(db, "posts"), { titulo, autor, mensagem, imagem });
+      let imageUrl = '';
+      if (imagem) {
+        imageUrl = await uploadImage(imagem);
+      }
+      await addDoc(collection(db, "posts"), { titulo, autor, mensagem, imagem: imageUrl });
       buscarPosts();
     } catch (error) {
       setError(error);
@@ -46,7 +57,11 @@ export function usePosts() {
   async function atualizarPost(id, titulo, autor, mensagem, imagem) {
     const docRef = doc(db, "posts", id);
     try {
-      await updateDoc(docRef, { titulo, autor, mensagem, imagem });
+      let imageUrl = imagem;
+      if (imagem instanceof File) {
+        imageUrl = await uploadImage(imagem);
+      }
+      await updateDoc(docRef, { titulo, autor, mensagem, imagem: imageUrl });
       buscarPosts();
     } catch (error) {
       setError(error);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Container, Row, Col, Form, Button, ListGroup } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, ListGroup, Image } from "react-bootstrap";
 import "./App.css";
 import { usePosts } from "./usePosts";
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -8,23 +8,26 @@ function App() {
   const [titulo, setTitulo] = useState('');
   const [autor, setAutor] = useState('');
   const [mensagem, setMensagem] = useState('');
+  const [imagem, setImagem] = useState(null);
   const [idPost, setIdPost] = useState('');
   const [busca, setBusca] = useState('');
   const { posts, adicionarPost, atualizarPost, excluirPost } = usePosts();
 
   const handleAdicionar = () => {
-    adicionarPost(titulo, autor, mensagem);
+    adicionarPost(titulo, autor, mensagem, imagem);
     setTitulo('');
     setAutor('');
     setMensagem('');
+    setImagem(null);
   };
 
   const handleAtualizar = () => {
-    atualizarPost(idPost, titulo, autor, mensagem);
+    atualizarPost(idPost, titulo, autor, mensagem, imagem);
     setIdPost('');
     setTitulo('');
     setAutor('');
     setMensagem('');
+    setImagem(null);
   };
 
   const handleEditar = (post) => {
@@ -32,6 +35,13 @@ function App() {
     setTitulo(post.titulo);
     setAutor(post.autor);
     setMensagem(post.mensagem);
+    setImagem(post.imagem);
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setImagem(URL.createObjectURL(e.target.files[0]));
+    }
   };
 
   const postsFiltrados = posts.filter(post => 
@@ -81,6 +91,14 @@ function App() {
                 onChange={(e) => setAutor(e.target.value)}
               />
             </Form.Group>
+            <Form.Group controlId="formImagem">
+              <Form.Label>Imagem:</Form.Label>
+              <Form.Control
+                type="file"
+                onChange={handleImageChange}
+              />
+              {imagem && <Image src={imagem} alt="Capa do Post" fluid />}
+            </Form.Group>
             <Button variant="primary" onClick={handleAdicionar} className="mr-2">Cadastrar</Button>
             <Button variant="secondary" onClick={handleAtualizar}>Atualizar Post</Button>
           </Form>
@@ -99,6 +117,7 @@ function App() {
           <ListGroup className="mt-4">
             {postsFiltrados.map((post) => (
               <ListGroup.Item key={post.id}>
+                {post.imagem && <Image src={post.imagem} alt={post.titulo} fluid />}
                 <div><strong>Id Post:</strong> {post.id}</div>
                 <div><strong>Título:</strong> {post.titulo}</div>
                 <div><strong>Autor:</strong> {post.autor}</div>

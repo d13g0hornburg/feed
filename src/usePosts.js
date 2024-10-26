@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { db, storage } from "./firebaseConnection";
-import { updateDoc, addDoc, doc, collection, getDocs, deleteDoc } from "firebase/firestore";
+import { updateDoc, addDoc, doc, collection, getDocs, deleteDoc, query, limit } from "firebase/firestore"; // Removido startAfter
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export function usePosts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const postsPerPage = 10; // Ajuste conforme necessário
 
   useEffect(() => {
     buscarPosts();
@@ -15,12 +16,14 @@ export function usePosts() {
   async function buscarPosts() {
     setLoading(true);
     const postRef = collection(db, "posts");
+    const q = query(postRef, limit(postsPerPage));
     try {
-      const snapshot = await getDocs(postRef);
+      const snapshot = await getDocs(q);
       let lista = [];
       snapshot.forEach((doc) => {
         lista.push({
           id: doc.id,
+          numericId: doc.data().numericId || parseInt(doc.id, 16), // Converte ID hexadecimal para numérico se não existir numericId
           titulo: doc.data().titulo,
           autor: doc.data().autor,
           mensagem: doc.data().mensagem,
@@ -47,7 +50,8 @@ export function usePosts() {
       if (imagem) {
         imageUrl = await uploadImage(imagem);
       }
-      await addDoc(collection(db, "posts"), { titulo, autor, mensagem, imagem: imageUrl });
+      const numericId = Date.now(); // Gera um ID numérico baseado no timestamp atual
+      await addDoc(collection(db, "posts"), { numericId, titulo, autor, mensagem, imagem: imageUrl });
       buscarPosts();
     } catch (error) {
       setError(error);

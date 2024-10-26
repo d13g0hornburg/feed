@@ -11,7 +11,8 @@ function App() {
   const [imagem, setImagem] = useState(null);
   const [idPost, setIdPost] = useState('');
   const [busca, setBusca] = useState('');
-  const { posts, adicionarPost, atualizarPost, excluirPost } = usePosts();
+  const [currentPage, setCurrentPage] = useState(0); // Estado para controlar a página atual
+  const { posts, adicionarPost, atualizarPost, excluirPost } = usePosts(); // Removido loadMorePosts
 
   const handleAdicionar = () => {
     adicionarPost(titulo, autor, mensagem, imagem);
@@ -48,8 +49,20 @@ function App() {
     post.titulo.toLowerCase().includes(busca.toLowerCase())
   );
 
+  const handleNextPage = () => {
+    if (currentPage < postsFiltrados.length - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   return (
-    <Container className="mt-4">
+    <Container className="mt-4" style={{ position: 'fixed', width: '100%' }}>
       <Row>
         <Col xs={12} md={4}>
           <h1>Adicionar/Editar Post</h1>
@@ -115,18 +128,22 @@ function App() {
             />
           </Form.Group>
           <ListGroup className="mt-4">
-            {postsFiltrados.map((post) => (
-              <ListGroup.Item key={post.id}>
-                {post.imagem && <Image src={post.imagem} alt={post.titulo} fluid />}
-                <div><strong>Id Post:</strong> {post.id}</div>
-                <div><strong>Título:</strong> {post.titulo}</div>
-                <div><strong>Autor:</strong> {post.autor}</div>
-                <div><strong>Mensagem:</strong> {post.mensagem}</div>
-                <Button variant="warning" onClick={() => handleEditar(post)} className="mr-2">Editar Post</Button>
-                <Button variant="danger" onClick={() => excluirPost(post.id)}>Excluir Post</Button>
+            {postsFiltrados.length > 0 && (
+              <ListGroup.Item key={postsFiltrados[currentPage].id}>
+                {postsFiltrados[currentPage].imagem && <Image src={postsFiltrados[currentPage].imagem} alt={postsFiltrados[currentPage].titulo} fluid />}
+                <div><strong>Id Post:</strong> {postsFiltrados[currentPage].numericId}</div>
+                <div><strong>Título:</strong> {postsFiltrados[currentPage].titulo}</div>
+                <div><strong>Autor:</strong> {postsFiltrados[currentPage].autor}</div>
+                <div><strong>Mensagem:</strong> {postsFiltrados[currentPage].mensagem}</div>
+                <Button variant="warning" onClick={() => handleEditar(postsFiltrados[currentPage])} className="mr-2">Editar Post</Button>
+                <Button variant="danger" onClick={() => excluirPost(postsFiltrados[currentPage].id)}>Excluir Post</Button>
               </ListGroup.Item>
-            ))}
+            )}
           </ListGroup>
+          <div className="mt-4">
+            <Button variant="secondary" onClick={handlePreviousPage} disabled={currentPage === 0}>Anterior</Button>
+            <Button variant="primary" onClick={handleNextPage} disabled={currentPage >= postsFiltrados.length - 1}>Próximo</Button>
+          </div>
         </Col>
       </Row>
     </Container>

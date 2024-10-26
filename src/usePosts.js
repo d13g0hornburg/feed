@@ -21,7 +21,9 @@ export function usePosts() {
         lista.push({
           id: doc.id,
           titulo: doc.data().titulo,
-          autor: doc.data().autor
+          autor: doc.data().autor,
+          mensagem: doc.data().mensagem,
+          imagem: doc.data().imagem
         });
       });
       setPosts(lista);
@@ -32,19 +34,19 @@ export function usePosts() {
     }
   }
 
-  async function adicionarPost(titulo, autor) {
+  async function adicionarPost(titulo, autor, mensagem, imagem) {
     try {
-      await addDoc(collection(db, "posts"), { titulo, autor });
+      await addDoc(collection(db, "posts"), { titulo, autor, mensagem, imagem });
       buscarPosts();
     } catch (error) {
       setError(error);
     }
   }
 
-  async function atualizarPost(id, titulo, autor) {
+  async function atualizarPost(id, titulo, autor, mensagem, imagem) {
     const docRef = doc(db, "posts", id);
     try {
-      await updateDoc(docRef, { titulo, autor });
+      await updateDoc(docRef, { titulo, autor, mensagem, imagem });
       buscarPosts();
     } catch (error) {
       setError(error);

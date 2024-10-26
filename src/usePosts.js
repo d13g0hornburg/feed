@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { db, storage } from "./firebaseConnection";
-import { updateDoc, addDoc, doc, collection, getDocs, deleteDoc, query, limit } from "firebase/firestore"; // Removido startAfter
+import { updateDoc, addDoc, doc, collection, getDocs, deleteDoc, query, limit } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export function usePosts() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const postsPerPage = 10; // Ajuste conforme necessário
+  const postsPerPage = 10;
 
   useEffect(() => {
     buscarPosts();
@@ -23,7 +23,7 @@ export function usePosts() {
       snapshot.forEach((doc) => {
         lista.push({
           id: doc.id,
-          numericId: doc.data().numericId || parseInt(doc.id, 16), // Converte ID hexadecimal para numérico se não existir numericId
+          numericId: doc.data().numericId || parseInt(doc.id, 16),
           titulo: doc.data().titulo,
           autor: doc.data().autor,
           mensagem: doc.data().mensagem,
@@ -50,7 +50,7 @@ export function usePosts() {
       if (imagem) {
         imageUrl = await uploadImage(imagem);
       }
-      const numericId = Date.now(); // Gera um ID numérico baseado no timestamp atual
+      const numericId = Date.now();
       await addDoc(collection(db, "posts"), { numericId, titulo, autor, mensagem, imagem: imageUrl });
       buscarPosts();
     } catch (error) {
@@ -59,6 +59,10 @@ export function usePosts() {
   }
 
   async function atualizarPost(id, titulo, autor, mensagem, imagem) {
+    if (!id) {
+      setError(new Error("ID do post é inválido."));
+      return;
+    }
     const docRef = doc(db, "posts", id);
     try {
       let imageUrl = imagem;
@@ -73,6 +77,10 @@ export function usePosts() {
   }
 
   async function excluirPost(id) {
+    if (!id) {
+      setError(new Error("ID do post é inválido."));
+      return;
+    }
     const docRef = doc(db, "posts", id);
     try {
       await deleteDoc(docRef);

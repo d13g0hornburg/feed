@@ -88,7 +88,36 @@ function App() {
         </Col>
       </Row>
       <Row>
-        <Col xs={12} md={4}>
+        <Col xs={12} md={8} className="order-1 order-md-1">
+          <h1>Posts</h1>
+          <Form.Group controlId="formBusca">
+            <Form.Label>Buscar:</Form.Label>
+            <Form.Control
+              type="text"
+              placeholder="Buscar por título"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+          </Form.Group>
+          <ListGroup className="mt-4">
+            {postsFiltrados.length > 0 && (
+              <ListGroup.Item key={postsFiltrados[currentPage].id}>
+                {postsFiltrados[currentPage].imagem && <Image src={postsFiltrados[currentPage].imagem} alt={postsFiltrados[currentPage].titulo} fluid />}
+                <div><strong>Id Post:</strong> {postsFiltrados[currentPage].numericId}</div>
+                <div><strong>Título:</strong> {postsFiltrados[currentPage].titulo}</div>
+                <div><strong>Autor:</strong> {postsFiltrados[currentPage].autor}</div>
+                <div><strong>Mensagem:</strong> {postsFiltrados[currentPage].mensagem}</div>
+                <Button variant="warning" onClick={() => handleEditar(postsFiltrados[currentPage])} className="mr-2">Editar</Button>
+                <Button variant="danger" onClick={() => excluirPost(postsFiltrados[currentPage].id)}>Excluir</Button>
+              </ListGroup.Item>
+            )}
+          </ListGroup>
+          <div className="pagination-buttons">
+            <Button variant="secondary" onClick={handlePreviousPage} disabled={currentPage === 0}>Anterior</Button>
+            <Button variant="primary" onClick={handleNextPage} disabled={currentPage >= postsFiltrados.length - 1}>Próximo</Button>
+          </div>
+        </Col>
+        <Col xs={12} md={4} className="order-2 order-md-2">
           <h1>Adicionar/Editar Post</h1>
           {error && <Alert variant="danger">{error}</Alert>}
           <Form>
@@ -146,35 +175,6 @@ function App() {
               <Button variant="secondary" onClick={handleAtualizar}>Atualizar Post</Button>
             </div>
           </Form>
-        </Col>
-        <Col xs={12} md={8}>
-          <h1>Posts</h1>
-          <Form.Group controlId="formBusca">
-            <Form.Label>Buscar:</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="Buscar por título"
-              value={busca}
-              onChange={(e) => setBusca(e.target.value)}
-            />
-          </Form.Group>
-          <ListGroup className="mt-4">
-            {postsFiltrados.length > 0 && (
-              <ListGroup.Item key={postsFiltrados[currentPage].id}>
-                {postsFiltrados[currentPage].imagem && <Image src={postsFiltrados[currentPage].imagem} alt={postsFiltrados[currentPage].titulo} fluid />}
-                <div><strong>Id Post:</strong> {postsFiltrados[currentPage].numericId}</div>
-                <div><strong>Título:</strong> {postsFiltrados[currentPage].titulo}</div>
-                <div><strong>Autor:</strong> {postsFiltrados[currentPage].autor}</div>
-                <div><strong>Mensagem:</strong> {postsFiltrados[currentPage].mensagem}</div>
-                <Button variant="warning" onClick={() => handleEditar(postsFiltrados[currentPage])} className="mr-2">Editar</Button>
-                <Button variant="danger" onClick={() => excluirPost(postsFiltrados[currentPage].id)}>Excluir</Button>
-              </ListGroup.Item>
-            )}
-          </ListGroup>
-          <div className="pagination-buttons">
-            <Button variant="secondary" onClick={handlePreviousPage} disabled={currentPage === 0}>Anterior</Button>
-            <Button variant="primary" onClick={handleNextPage} disabled={currentPage >= postsFiltrados.length - 1}>Próximo</Button>
-          </div>
         </Col>
       </Row>
     </Container>

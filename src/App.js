@@ -13,6 +13,7 @@ function App() {
   const [busca, setBusca] = useState('');
   const [currentPage, setCurrentPage] = useState(0);
   const [error, setError] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
   const { posts, adicionarPost, atualizarPost, excluirPost } = usePosts();
 
   const handleAdicionar = () => {
@@ -72,8 +73,20 @@ function App() {
     }
   };
 
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.body.classList.toggle('dark', !darkMode);
+  };
+
   return (
-    <Container className="mt-4" style={{ position: 'fixed', width: '100%' }}>
+    <Container className="mt-4">
+      <Row>
+        <Col xs={12} className="text-right">
+          <Button variant="secondary" onClick={toggleDarkMode}>
+            {darkMode ? 'Light Mode' : 'Dark Mode'}
+          </Button>
+        </Col>
+      </Row>
       <Row>
         <Col xs={12} md={4}>
           <h1>Adicionar/Editar Post</h1>
@@ -128,8 +141,10 @@ function App() {
               />
               {imagem && <Image src={URL.createObjectURL(imagem)} alt="Capa do Post" fluid />}
             </Form.Group>
-            <Button variant="primary" onClick={handleAdicionar} className="mr-2">Cadastrar</Button>
-            <Button variant="secondary" onClick={handleAtualizar}>Atualizar Post</Button>
+            <div className="button-group">
+              <Button variant="primary" onClick={handleAdicionar}>Cadastrar</Button>
+              <Button variant="secondary" onClick={handleAtualizar}>Atualizar Post</Button>
+            </div>
           </Form>
         </Col>
         <Col xs={12} md={8}>
@@ -151,12 +166,12 @@ function App() {
                 <div><strong>Título:</strong> {postsFiltrados[currentPage].titulo}</div>
                 <div><strong>Autor:</strong> {postsFiltrados[currentPage].autor}</div>
                 <div><strong>Mensagem:</strong> {postsFiltrados[currentPage].mensagem}</div>
-                <Button variant="warning" onClick={() => handleEditar(postsFiltrados[currentPage])} className="mr-2">Editar Post</Button>
-                <Button variant="danger" onClick={() => excluirPost(postsFiltrados[currentPage].id)}>Excluir Post</Button>
+                <Button variant="warning" onClick={() => handleEditar(postsFiltrados[currentPage])} className="mr-2">Editar</Button>
+                <Button variant="danger" onClick={() => excluirPost(postsFiltrados[currentPage].id)}>Excluir</Button>
               </ListGroup.Item>
             )}
           </ListGroup>
-          <div className="mt-4">
+          <div className="pagination-buttons">
             <Button variant="secondary" onClick={handlePreviousPage} disabled={currentPage === 0}>Anterior</Button>
             <Button variant="primary" onClick={handleNextPage} disabled={currentPage >= postsFiltrados.length - 1}>Próximo</Button>
           </div>

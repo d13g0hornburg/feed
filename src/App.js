@@ -48,7 +48,7 @@ function App() {
     setTitulo(post.titulo);
     setAutor(post.autor);
     setMensagem(post.mensagem);
-    setImagem(post.imagem);
+    setImagem(post.imagem || null); // Verifique se a imagem é uma URL ou um arquivo
   };
 
   const handleImageChange = (e) => {
@@ -168,7 +168,7 @@ function App() {
                 type="file"
                 onChange={handleImageChange}
               />
-              {imagem && <Image src={URL.createObjectURL(imagem)} alt="Capa do Post" fluid />}
+              {imagem && typeof imagem === 'string' && <Image src={imagem} alt="Capa do Post" fluid />}
             </Form.Group>
             <div className="button-group">
               <Button variant="primary" onClick={handleAdicionar}>Cadastrar</Button>

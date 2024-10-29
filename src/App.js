@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Container, Row, Col, Form, Button, ListGroup, Image, Alert } from "react-bootstrap";
 import "./App.css";
 import { usePosts } from "./usePosts";
